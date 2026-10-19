@@ -19,17 +19,50 @@ value_checker(){
 	local val="$1"
 
 	#check if $val contains VT-x or AMD-V
-	if [[ $val == *"VT-x"* ]]; then
+	if [[ "$val" =~ VT-x|vt-x ]]; then
 		echo "Intel ok"
-	elif [[ "$val" == *"AMD-V"* ]]; then
+		return 0
+	elif [[ "$val" =~ AMD-V|amd-v ]]; then
 		echo "AMD OK"
-	else echo "unknown or disabled hardware virtualization"
+		return 0
+	else
+		echo "[FAIL] unknown or disabled virtualization"
+		return 1
 	fi
 }
 
-#Print raw values
+kvm_installer(){
+	echo "Installing KVM packages"
+	sudo dnf install -y qemu-kvm libvirt virt-install libvirt-client
+}
+
+kvm_install_checker(){
+	sudo dnf list installed qemu-kvm libvirt virt-install libvirt-client
+}
+
+kvm_enable(){
+	sudo systemctl enable --now libvirtd
+}
+
+kvm_status_checker(){
+	systemctl is-active libvirtd && systemctl is-enabled libvirtd
+}
+
+
+
+Print raw values
 value_printer "$(check_system_virt_capabilities)"
 value_printer "$(check_system_cpu_flag_count)"
 
-#Check and dispaly verdict
-value_checker "$(check_system_virt_capabilities)"
+Check capabilities and isntall if check passes
+if value_checker "$(check_system_virt_capabilities)"; then
+	echo "Prerequisites met. Proceeding with installation."
+	kvm_installer
+else
+	echo "Prereqs failed. Aborting installation."
+	exit 1
+fi
+
+kvm_install_checker
+kvm_enable
+kvm_status_checker

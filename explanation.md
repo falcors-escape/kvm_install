@@ -28,4 +28,20 @@ $1 is the first positional argument passed intoo the function (output of check_s
 [[ ... ]] is Bash's extended test command. Double brackets support pattern matching using wildcards. 
 *"VT-x"* matches the pattern containing VT-x, same thing with the AMD-V portion of in the elif statement. fi closes the if statement. 
 
+5) kvm_installer()
+This function uses the dnf package manager to install qemu-kvm, libvirt, virt-install and libvirt-client
+qemu-kvm: core hypervisor that provides kernel level hardware virtualization
+libvirt: background daemon service (libvirtd) that manages the lifecycle, networking, and storage of a virtual machine
+virt-install: command line tool used to create, configure, and provision new virtual machines
+libvirt-client: client-side utilities and API libraries (including virsh) that allow users to manage hypervisors remotely or locally
 
+6) install_checker()
+uses the list install parameters with dnf to verify if the packages were installed
+
+7) kvm_enable()
+starts the libvirt daemon now and enables it upon startup with systemctl
+
+8) kvm_status_checker
+Checkes the status with systemctl is the service is active and enabled and prints the results
+
+function calls and logic (determining if the prereqs are met and to proceed with installation of the actual packages. 
